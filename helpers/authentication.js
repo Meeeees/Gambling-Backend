@@ -3,7 +3,11 @@ const { v4: uuidv4 } = require('uuid')
 const bcrypt = require('bcryptjs')
 const saltrounds = 10;
 
-let activeTokens = []
+let activeTokens = [{
+    token: 'admin',
+    load: 1,
+    time: new Date()
+}]
 const createUser = async (username, email, password) => {
     let connection = await db.getConnection()
     try {
@@ -104,6 +108,30 @@ const GetUser = async (id) => {
     }
 }
 
+const updateBalance = async (id, balance) => {
+    const connection = await db.getConnection();
+    try {
+        const [rows, fields] = await connection.query('UPDATE User SET balance = ? WHERE user_id = ?', [balance, id]);
+        return {
+            success: true,
+            status: 200,
+            message: 'Balance updated'
+        }
+    } catch (error) {
+        console.error(error);
+        return {
+            success: false,
+            status: 500,
+            message: 'Internal server error'
+        }
+    } finally {
+        if (connection) {
+            connection.release();
+        }
+    }
+}
+
+
 const GenerateToken = (id) => {
     const token = uuidv4()
     activeTokens.push({
@@ -111,7 +139,6 @@ const GenerateToken = (id) => {
         load: id,
         time: Date.now()
     })
-    console.log(activeTokens)
     return token
 }
 
@@ -148,5 +175,6 @@ module.exports = {
     AuthenticateUser,
     GetUser,
     GenerateToken,
-    ValidateToken
+    ValidateToken,
+    updateBalance
 }

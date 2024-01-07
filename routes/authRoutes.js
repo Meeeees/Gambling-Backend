@@ -28,7 +28,6 @@ router.post('/signin', (req, res) => {
 
 router.post('/verify', async (req, res) => {
     let data = await Authentication.ValidateToken(req.body.token)
-    console.log(data)
     res.send(data)
 })
 
